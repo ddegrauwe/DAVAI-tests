@@ -13,7 +13,7 @@ import davai
 from davai_taskutil.mixins import DavaiIALTaskMixin, IncludesTaskMixin
 
 
-class PGD(Task, DavaiIALTaskMixin, IncludesTaskMixin):
+class C923(Task, DavaiIALTaskMixin, IncludesTaskMixin):
 
     experts = [FPDict({'kind':'fields_in_file'})]
     _taskinfo_kind = 'statictaskinfo'
@@ -24,6 +24,12 @@ class PGD(Task, DavaiIALTaskMixin, IncludesTaskMixin):
                          self.conf.model,
                          self.conf.geometry.tag])
 
+    def _flow_input_pgd_block(self):
+        return '-'.join([self.conf.prefix,
+                         'pgd',
+                         self.conf.model,
+                         self.conf.geometry.tag])
+                         
     def output_block(self):
         return '-'.join([self.conf.prefix,
                          self.tag])
@@ -39,95 +45,55 @@ class PGD(Task, DavaiIALTaskMixin, IncludesTaskMixin):
 
         # 1.1.0/ Reference resources, to be compared to:
         if 'early-fetch' in self.steps or 'fetch' in self.steps:
-            # disabling reference for now.
-            if False:
-              self._wrapped_input(**self._reference_continuity_expertise())
-              self._wrapped_input(
-                  role           = 'Reference',  # PgdFile
-                  block          = self.output_block(),
-                  experiment     = self.conf.ref_xpid,
-                  fatal          = False,
-                  format         = 'fa',
-                  kind           = 'pgdfa',
-                  local          = 'ref.PGD.[format]',
-                  vconf          = self.conf.ref_vconf,
-              )
+            pass
+            
             #-------------------------------------------------------------------------------
 
         # 1.1.1/ Static Resources:
         if 'early-fetch' in self.steps or 'fetch' in self.steps:
             self._load_usual_tools()  # LFI tools, ecCodes defs, ...
             #-------------------------------------------------------------------------------
+            
             self._wrapped_input(
-                role           = 'CoverParams',
-                format         = 'foo',
+                role           = 'WaterPercentageDB',
+                format         = 'bin',
                 genv           = self.conf.appenv_clim,
-                kind           = 'coverparams',
-                local          = 'ecoclimap_covers_param.tgz',
-                source         = 'ecoclimap',
+                geometry       = 'global2m5',
+                kind           = 'water_percentage',
+                local          = 'Water_Percentage',
+                source         = 'GTOPO30',
             )
-            #-------------------------------------------------------------------------------
+
             self._wrapped_input(
-                role           = 'Sand DB',
-                format         = 'dir/hdr',
+                role           = 'OrographyDerivedParameters',
+                format         = 'bin',
                 genv           = self.conf.appenv_clim,
-                kind           = 'sand',
-                local          = 'sand_DB.tgz',
-                source         = self.conf.sand_source,
+                geometry       = 'global2m5',
+                kind           = 'misc_orography',
+                local          = 'misc_orography.tgz',
+                source         = 'GTOPO30',
             )
-            #-------------------------------------------------------------------------------
+
             self._wrapped_input(
-                role           = 'Clay DB',
-                format         = 'dir/hdr',
+                role           = 'UrbanisationDB',
+                format         = 'bin',
                 genv           = self.conf.appenv_clim,
-                kind           = 'clay',
-                local          = 'clay_DB.tgz',
-                source         = self.conf.clay_source,
+                geometry       = 'global2m5',
+                kind           = 'urbanisation',
+                local          = 'Urbanisation',
+                source         = 'GTOPO30',
             )
-            #-------------------------------------------------------------------------------
-            self._wrapped_input(
-                role           = 'Surface Type DB',
-                format         = 'dir/hdr',
-                genv           = self.conf.appenv_clim,
-                kind           = 'surface_type',
-                local          = 'surfacetype_DB.tgz',
-                source         = self.conf.surface_type_source,
-            )
-            #-------------------------------------------------------------------------------
-            self._wrapped_input(
-                role           = 'Orography DB',
-                format         = 'dir/hdr',
-                genv           = self.conf.appenv_clim,
-                geometry       = self.conf.orography_geometry,
-                kind           = 'orography',
-                local          = 'orography_DB.tgz',
-                source         = self.conf.orography_source,
-            )
-            #-------------------------------------------------------------------------------
-            if 'bathymetry_source' in self.conf:
-                self._wrapped_input(
-                    role           = 'Bathymetry DB',
-                    format         = 'dir/hdr',
-                    genv           = self.conf.appenv_clim,
-                    geometry       = self.conf.bathymetry_geometry,
-                    kind           = 'bathymetry',
-                    local          = 'etopo.tgz',
-                    source         = self.conf.bathymetry_source,
-                )
-            #-------------------------------------------------------------------------------
 
         # 1.1.2/ Static Resources (namelist(s) & config):
         if 'early-fetch' in self.steps or 'fetch' in self.steps:
+            # daand: moved it to 2.1/ because it's generated by make_lam_domain
             pass
             #-------------------------------------------------------------------------------
 
         # 1.1.3/ Static Resources (executables):
         if 'early-fetch' in self.steps or 'fetch' in self.steps:
             #-------------------------------------------------------------------------------
-            tbx = self.flow_executable(
-                kind           = 'buildpgd',
-                local          = 'PGD.X',
-            )
+            tbx = self.flow_executable()
             #-------------------------------------------------------------------------------
 
         # 1.2/ Flow Resources (initial): theoretically flow-resources, but statically stored in input_shelf
@@ -137,29 +103,58 @@ class PGD(Task, DavaiIALTaskMixin, IncludesTaskMixin):
 
         # 2.1/ Flow Resources: produced by another task of the same job
         if 'fetch' in self.steps:
-            tbgeo = self._wrapped_input(  # this is stored in shelf rather than uenv because generated by domain_maker
-                role           = 'Namelist',
-                binary         = 'arpege',
+
+            #-------------------------------------------------------------------------------
+
+            tbtrunc=self._wrapped_input(
+                role           = 'TruncationDefinition',
                 block          = self._flow_input_name_block(),
                 experiment     = self.conf.xpid,
                 format         = 'ascii',
                 geometry       = self.conf.geometry.tag,
-                intent         = 'in',
                 kind           = 'geoblocks',
-                local          = '{}.namel_buildpgd.geoblocks'.format(self.conf.geometry.tag),
-                target         = 'buildpgd',
+                local          = 'truncation_blocks.nam',
+                target         = 'c923_orography',
             )
+
             #-------------------------------------------------------------------------------
+
+            tbgeo=self._wrapped_input(
+                role           = 'GeometryDefinition',
+                block          =  self._flow_input_name_block(),
+                experiment = self.conf.xpid,
+                format         = 'ascii',
+                geometry = self.conf.geometry.tag,
+                kind           = 'geoblocks',
+                local          = 'geometry_blocks.nam',
+                target         = 'c923',
+            )
+
+            #-------------------------------------------------------------------------------
+            
             self._wrapped_input(
                 role           = 'Namelist',
                 binary         = 'arpege',
                 format         = 'ascii',
                 genv           = self.conf.appenv_clim,
-                hook_geo       = (update_namelist, tbgeo),
+                hook_geo       = (update_namelist, tbgeo, tbtrunc),
                 intent         = 'inout',
                 kind           = 'namelist',
-                local          = 'OPTIONS.nam',
-                source         = '{}/namel_buildpgd'.format(self.conf.model),
+                local          = 'fort.4',
+                source         = self.conf.model+'/namel_c923_orography',
+            )
+
+            #-------------------------------------------------------------------------------
+
+            # PGD file
+            self._wrapped_input(
+                role           = 'Pgd',
+                block          = self._flow_input_pgd_block(),
+                experiment     = self.conf.xpid,
+                format         = 'fa',
+                kind           = 'pgd',
+                local          = 'Neworog',
+                nativefmt      = 'fa',
             )
             #-------------------------------------------------------------------------------
 
@@ -168,42 +163,42 @@ class PGD(Task, DavaiIALTaskMixin, IncludesTaskMixin):
             self._notify_start_compute()
             self.sh.title('Toolbox algo = tbalgo')
             tbalgo = toolbox.algo(
-                crash_witness  = True,
-                drhookprof     = self.conf.drhook_profiling,
-                engine         = 'blind',
-                kind           = 'buildpgd',
+                conf           = '923',
+                engine         = 'parallel',
+                kind           = 'c923',
+                orog_in_pgd    = True,
+                step           = '1',
             )
             print(self.ticket.prompt, 'tbalgo =', tbalgo)
             print()
             self.component_runner(tbalgo, tbx)
             #-------------------------------------------------------------------------------
-            self.run_expertise()
+            #self.run_expertise()
             #-------------------------------------------------------------------------------
 
         # 2.3/ Flow Resources: produced by this task and possibly used by a subsequent flow-dependant task
         if 'backup' in self.steps:
             #-------------------------------------------------------------------------------
-            self._wrapped_output(
-                role           = 'PgdFile',
+            self._wrapper_output = toolbox.output(
+                role           = 'ClimFile',
                 block          = self.output_block(),
                 experiment     = self.conf.xpid,
                 format         = 'fa',
-                kind           = 'pgdfa',
-                local          = 'PGD.[format]',
-                namespace      = self.REF_OUTPUT,
+                kind           = 'clim_model',
+                local          = 'Const.Clim',
             )
+
             #-------------------------------------------------------------------------------
 
         # 3.0.1/ Davai expertise:
         if 'late-backup' in self.steps or 'backup' in self.steps:
+            pass
             #self._wrapped_output(**self._output_expertise())
             #self._wrapped_output(**self._output_comparison_expertise())
-            pass
             #-------------------------------------------------------------------------------
 
         # 3.0.2/ Other output resources of possible interest:
         if 'late-backup' in self.steps or 'backup' in self.steps:
-            #self._wrapped_output(**self._output_listing())
-            pass
+            self._wrapped_output(**self._output_listing())
             #-------------------------------------------------------------------------------
 

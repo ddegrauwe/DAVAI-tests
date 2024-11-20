@@ -19,7 +19,7 @@ class Prep(Task, DavaiIALTaskMixin, IncludesTaskMixin):
 
     def _flow_input_pgd_block(self):
         return '-'.join([self.conf.prefix,
-                         'pgd',
+                         'finalize-pgd',
                          self.conf.model,
                          self.conf.geometry.tag])
 

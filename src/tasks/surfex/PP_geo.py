@@ -10,7 +10,9 @@ from vortex.layout.nodes import Driver, Family, LoopFamily
 
 from tasks.surfex.pgd import PGD
 from tasks.surfex.prep import Prep
-
+from tasks.surfex.c923 import C923
+from tasks.surfex.make_lam_domain import MakeLamDomain
+from tasks.surfex.finalize_pgd import FinalizePGD
 
 def setup(t, **kw):
     return Driver(tag='drv', ticket=t, options=kw, nodes=[
@@ -21,26 +23,29 @@ def setup(t, **kw):
                         loopconf='geometrys',
                         loopsuffix='-{0.tag}',
                         nodes=[
-                        Family(tag='PP-aro', ticket=t, on_error='delayed_fail', nodes=[
+                        Family(tag='PP-arome', ticket=t, on_error='delayed_fail', nodes=[
+                            MakeLamDomain(tag='make-domain-arome', ticket=t, **kw),
                             PGD(tag='pgd-arome', ticket=t, **kw),
+                            C923(tag='c923-arome', ticket=t, **kw),
+                            FinalizePGD(tag='finalize-pgd-arome', ticket=t, **kw),
                             Prep(tag='prep-arome', ticket=t, **kw),
                             ], **kw),
                         ], **kw),
                     ], **kw),
                 ], **kw),
-            Family(tag='arpege', ticket=t, on_error='delayed_fail', nodes=[
-                Family(tag='arpege_physiography', ticket=t, nodes=[
-                    LoopFamily(tag='gauss_grids', ticket=t,
-                        loopconf='geometrys',
-                        loopsuffix='-{0.tag}',
-                        nodes=[
-                        Family(tag='PP-arp', ticket=t, on_error='delayed_fail', nodes=[
-                            PGD(tag='pgd-arpege', ticket=t, **kw),
-                            Prep(tag='prep-arpege', ticket=t, **kw),
-                            ], **kw),
-                        ], **kw),
-                    ], **kw),
-                ], **kw),
+            # Family(tag='arpege', ticket=t, on_error='delayed_fail', nodes=[
+                # Family(tag='arpege_physiography', ticket=t, nodes=[
+                    # LoopFamily(tag='gauss_grids', ticket=t,
+                        # loopconf='geometrys',
+                        # loopsuffix='-{0.tag}',
+                        # nodes=[
+                        # Family(tag='PP-arp', ticket=t, on_error='delayed_fail', nodes=[
+                            # PGD(tag='pgd-arpege', ticket=t, **kw),
+                            # Prep(tag='prep-arpege', ticket=t, **kw),
+                            # ], **kw),
+                        # ], **kw),
+                    # ], **kw),
+                # ], **kw),
             ], **kw),
         ],
     )
