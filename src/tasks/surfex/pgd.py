@@ -39,19 +39,8 @@ class PGD(Task, DavaiIALTaskMixin, IncludesTaskMixin):
 
         # 1.1.0/ Reference resources, to be compared to:
         if 'early-fetch' in self.steps or 'fetch' in self.steps:
-            # disabling reference for now.
-            if False:
-              self._wrapped_input(**self._reference_continuity_expertise())
-              self._wrapped_input(
-                  role           = 'Reference',  # PgdFile
-                  block          = self.output_block(),
-                  experiment     = self.conf.ref_xpid,
-                  fatal          = False,
-                  format         = 'fa',
-                  kind           = 'pgdfa',
-                  local          = 'ref.PGD.[format]',
-                  vconf          = self.conf.ref_vconf,
-              )
+            # comparison to reference PGD file is done after finalize_pgd step.
+            self._wrapped_input(**self._reference_continuity_expertise())
             #-------------------------------------------------------------------------------
 
         # 1.1.1/ Static Resources:
@@ -196,14 +185,12 @@ class PGD(Task, DavaiIALTaskMixin, IncludesTaskMixin):
 
         # 3.0.1/ Davai expertise:
         if 'late-backup' in self.steps or 'backup' in self.steps:
-            #self._wrapped_output(**self._output_expertise())
-            #self._wrapped_output(**self._output_comparison_expertise())
             pass
             #-------------------------------------------------------------------------------
 
         # 3.0.2/ Other output resources of possible interest:
         if 'late-backup' in self.steps or 'backup' in self.steps:
-            #self._wrapped_output(**self._output_listing())
+            self._wrapped_output(**self._output_listing())
             pass
             #-------------------------------------------------------------------------------
 

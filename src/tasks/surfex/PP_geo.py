@@ -33,19 +33,20 @@ def setup(t, **kw):
                         ], **kw),
                     ], **kw),
                 ], **kw),
-            # Family(tag='arpege', ticket=t, on_error='delayed_fail', nodes=[
-                # Family(tag='arpege_physiography', ticket=t, nodes=[
-                    # LoopFamily(tag='gauss_grids', ticket=t,
-                        # loopconf='geometrys',
-                        # loopsuffix='-{0.tag}',
-                        # nodes=[
-                        # Family(tag='PP-arp', ticket=t, on_error='delayed_fail', nodes=[
-                            # PGD(tag='pgd-arpege', ticket=t, **kw),
-                            # Prep(tag='prep-arpege', ticket=t, **kw),
-                            # ], **kw),
-                        # ], **kw),
-                    # ], **kw),
-                # ], **kw),
+            Family(tag='arpege', ticket=t, on_error='delayed_fail', nodes=[
+                Family(tag='arpege_physiography', ticket=t, nodes=[
+                    LoopFamily(tag='gauss_grids', ticket=t,
+                        loopconf='geometrys',
+                        loopsuffix='-{0.tag}',
+                        nodes=[
+                        Family(tag='PP-arpege', ticket=t, on_error='delayed_fail', nodes=[
+                            MakeGlobalDomain(
+                            PGD(tag='pgd-arpege', ticket=t, **kw),
+                            Prep(tag='prep-arpege', ticket=t, **kw),
+                            ], **kw),
+                        ], **kw),
+                    ], **kw),
+                ], **kw),
             ], **kw),
         ],
     )

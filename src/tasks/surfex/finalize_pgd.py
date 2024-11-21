@@ -45,23 +45,22 @@ class FinalizePGD(Task, DavaiIALTaskMixin, IncludesTaskMixin):
 
         # 1.1.0/ Reference resources, to be compared to:
         if 'early-fetch' in self.steps or 'fetch' in self.steps:
-            if False:
-              self._wrapped_input(**self._reference_continuity_expertise())
-              self._wrapped_input(
-                  role           = 'Reference',  # PgdFile
-                  block          = self.output_block(),
-                  experiment     = self.conf.ref_xpid,
-                  fatal          = False,
-                  format         = 'fa',
-                  kind           = 'pgdfa',
-                  local          = 'ref.PGD.[format]',
-                  vconf          = self.conf.ref_vconf,
-              )
+            self._wrapped_input(
+                role           = 'Reference',  # PgdFile
+                block          = self.output_block(),
+                experiment     = self.conf.ref_xpid,
+                fatal          = False,
+                format         = 'fa',
+                kind           = 'pgdfa',
+                local          = 'ref.PGD.[format]',
+                vconf          = self.conf.ref_vconf,
+            )
             #-------------------------------------------------------------------------------
 
         # 1.1.1/ Static Resources:
         if 'early-fetch' in self.steps or 'fetch' in self.steps:
             self._load_usual_tools()  # LFI tools, ecCodes defs, ...
+            pass
             #-------------------------------------------------------------------------------
 
         # 1.1.2/ Static Resources (namelist(s) & config):
@@ -90,8 +89,8 @@ class FinalizePGD(Task, DavaiIALTaskMixin, IncludesTaskMixin):
                 experiment     = self.conf.xpid,
                 intent         = 'inout',
                 format         = 'fa',
-                kind           = 'pgd',
-                local          = 'pgdfile.[format]',
+                kind           = 'pgdfa',
+                local          = 'PGD.[format]',
                 nativefmt      = 'fa',
             )
 
@@ -130,8 +129,8 @@ class FinalizePGD(Task, DavaiIALTaskMixin, IncludesTaskMixin):
               block          = self.output_block(),
               experiment     = self.conf.xpid,
               format         = 'fa',
-              kind           = 'pgd',
-              local          = 'pgdfile.[format]',
+              kind           = 'pgdfa',
+              local          = 'PGD.[format]',
               namespace      = self.REF_OUTPUT,
               nativefmt      = 'fa',
             )
@@ -139,9 +138,9 @@ class FinalizePGD(Task, DavaiIALTaskMixin, IncludesTaskMixin):
 
         # 3.0.1/ Davai expertise:
         if 'late-backup' in self.steps or 'backup' in self.steps:
+            self._wrapped_output(**self._output_expertise())
+            self._wrapped_output(**self._output_comparison_expertise())
             pass
-            #self._wrapped_output(**self._output_expertise())
-            #self._wrapped_output(**self._output_comparison_expertise())
             #-------------------------------------------------------------------------------
 
         # 3.0.2/ Other output resources of possible interest:

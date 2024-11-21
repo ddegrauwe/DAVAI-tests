@@ -85,7 +85,10 @@ class MakeLamDomain(Task, DavaiIALTaskMixin, IncludesTaskMixin):
                 e_zone_in_pgd  = True,
                 engine         = 'algo',
                 format         = '',
-                geom_params     =  {'Iwidth':16,'Xpoints_CI':117,'Ypoints_CI':85,'center_lat':self.center_lat(),'center_lon':2.0,'force_projection':self.projection(),'maximize_CI_in_E':False,'reference_lat':None,'resolution':2500,'tilting':0},
+                # general domain with custom projection
+                geom_params     =  {'Iwidth':8,'Xpoints_CI':117,'Ypoints_CI':85,'center_lat':self.center_lat(),'center_lon':2.0,'force_projection':self.projection(),'maximize_CI_in_E':False,'reference_lat':None,'resolution':2500,'tilting':0},
+                # hardcoded nm2500 settings
+                #geom_params     =  {'Iwidth':8,'Xpoints_CI':181,'Ypoints_CI':97,'center_lat':7,'center_lon':80,'force_projection':'mercator','maximize_CI_in_E':False,'reference_lat':None,'resolution':2500,'tilting':0},
                 geometry        = self.conf.geometry.tag,
                 i_width_in_pgd = True,
                 illustration   = False,

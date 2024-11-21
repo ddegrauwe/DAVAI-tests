@@ -2,7 +2,7 @@
 
 from __future__ import print_function, absolute_import, unicode_literals, division
 
-from footprints import FPDict
+from footprints import FPDict, FPList
 
 import vortex
 from vortex import toolbox
@@ -15,11 +15,13 @@ from davai_taskutil.mixins import DavaiIALTaskMixin, IncludesTaskMixin
 
 class Prep(Task, DavaiIALTaskMixin, IncludesTaskMixin):
 
-    experts = [FPDict({'kind':'fields_in_file'})]
+    experts = [FPDict({'kind':'fields_in_file','filenames':FPList(['PREP1_interpolated.fa'])})]
+    #experts = [FPDict({'kind':'fields_in_file'})]
 
     def _flow_input_pgd_block(self):
         return '-'.join([self.conf.prefix,
                          'finalize-pgd',
+                         #'pgd',
                          self.conf.model,
                          self.conf.geometry.tag])
 
@@ -139,6 +141,7 @@ class Prep(Task, DavaiIALTaskMixin, IncludesTaskMixin):
                     role           = 'Target Clim',  # PGD
                     block          = self._flow_input_pgd_block(),
                     experiment     = self.conf.xpid,
+                    intent = 'inout',
                     format         = 'fa',
                     geometry       = self.conf.geometry,
                     kind           = 'pgdfa',
