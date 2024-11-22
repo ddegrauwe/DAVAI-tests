@@ -40,7 +40,6 @@ def setup(t, **kw):
                         loopsuffix='-{0.tag}',
                         nodes=[
                         Family(tag='PP-arpege', ticket=t, on_error='delayed_fail', nodes=[
-                            MakeGlobalDomain(
                             PGD(tag='pgd-arpege', ticket=t, **kw),
                             Prep(tag='prep-arpege', ticket=t, **kw),
                             ], **kw),

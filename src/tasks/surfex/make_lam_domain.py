@@ -17,20 +17,23 @@ class MakeLamDomain(Task, DavaiIALTaskMixin, IncludesTaskMixin):
 
     experts = [FPDict({'kind':'fields_in_file'})]
     _taskinfo_kind = 'statictaskinfo'
-    
-    def center_lat(self):
-      if self.conf.geometry.tag[0]=='n':
-        return(50.)
+            
+    def geom_params(self):
+      if self.conf.geometry.tag == 'nm2500':
+        gp =  {'Iwidth':8,'Xpoints_CI':181,'Ypoints_CI':97,'center_lat':7.,'center_lon':80.,'force_projection':'mercator','maximize_CI_in_E':False,'reference_lat':None,'resolution':2500,'tilting':0}
+      elif self.conf.geometry.tag == 'sm2500':
+        gp =  {'Iwidth':8,'Xpoints_CI':181,'Ypoints_CI':97,'center_lat':-1.,'center_lon':-78.,'force_projection':'mercator','maximize_CI_in_E':False,'reference_lat':None,'resolution':2500,'tilting':0}
+      elif self.conf.geometry.tag == 'nlcc2500':
+        gp =  {'Iwidth':8,'Xpoints_CI':97,'Ypoints_CI':181,'center_lat':8.5,'center_lon':43.,'force_projection':'lambert','maximize_CI_in_E':False,'reference_lat':None,'resolution':2500,'tilting':0}
+      elif self.conf.geometry.tag == 'slcc2500':
+        gp =  {'Iwidth':8,'Xpoints_CI':181,'Ypoints_CI':97,'center_lat':-42,'center_lon':146.,'force_projection':'lambert','maximize_CI_in_E':False,'reference_lat':None,'resolution':2500,'tilting':0}
+      elif self.conf.geometry.tag == 'nps2500':
+        gp =  {'Iwidth':8,'Xpoints_CI':181,'Ypoints_CI':97,'center_lat':78.,'center_lon':16.,'force_projection':'polar_stereographic','maximize_CI_in_E':False,'reference_lat':None,'resolution':2500,'tilting':0}
+      elif self.conf.geometry.tag == 'sps2500':
+        gp =  {'Iwidth':8,'Xpoints_CI':181,'Ypoints_CI':97,'center_lat':-66.,'center_lon':140.,'force_projection':'polar_stereographic','maximize_CI_in_E':False,'reference_lat':None,'resolution':2500,'tilting':0}
       else:
-        return(-50.)
-        
-    def projection(self):
-      if self.conf.geometry.tag[1:].startswith('m'):
-        return('mercator')
-      if self.conf.geometry.tag[1:].startswith('lcc'):
-        return('lambert')
-      if self.conf.geometry.tag[1:].startswith('ps'):
-        return('polar_stereographic')
+        raise Exception("Unknown geometry: ",self.conf.geometry.tag)
+      return(gp)
 
     def output_block(self):
         return '-'.join([self.conf.prefix,
@@ -85,15 +88,12 @@ class MakeLamDomain(Task, DavaiIALTaskMixin, IncludesTaskMixin):
                 e_zone_in_pgd  = True,
                 engine         = 'algo',
                 format         = '',
-                # general domain with custom projection
-                geom_params     =  {'Iwidth':8,'Xpoints_CI':117,'Ypoints_CI':85,'center_lat':self.center_lat(),'center_lon':2.0,'force_projection':self.projection(),'maximize_CI_in_E':False,'reference_lat':None,'resolution':2500,'tilting':0},
-                # hardcoded nm2500 settings
-                #geom_params     =  {'Iwidth':8,'Xpoints_CI':181,'Ypoints_CI':97,'center_lat':7,'center_lon':80,'force_projection':'mercator','maximize_CI_in_E':False,'reference_lat':None,'resolution':2500,'tilting':0},
+                geom_params     = self.geom_params(),
                 geometry        = self.conf.geometry.tag,
                 i_width_in_pgd = True,
                 illustration   = False,
                 intent         = '',
-                kind           = 'make_domain',
+                kind           = 'make_lam_domain',
                 mode           = 'center_dims',    # 'center_dims' or 'lonlat_included'
                 orography_truncation = 'quadratic', # 'linear', 'quadratic' or 'cubic'
                 truncation = 'linear',
